@@ -6,12 +6,12 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import learning.nitish.github.BuildConfig;
 import okhttp3.Credentials;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -31,14 +31,11 @@ public class RetrofitModule {
     }
 
 
-
-
-
     @Provides
     @Singleton
-    Retrofit providesRetrofit(){
+    Retrofit providesRetrofit() {
 
-        final String credentials= Credentials.basic("devnitish29","c4335b84461f259f97d91ca156aca7ea37ba13d3");
+        final String credentials = Credentials.basic(BuildConfig.USER_NAME, BuildConfig.USER_TOKEN);
         Interceptor basicAuthInterceptor = new Interceptor() {
             @Override
             public Response intercept(Chain chain) throws IOException {
@@ -50,19 +47,15 @@ public class RetrofitModule {
         };
 
 
-        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
         return new Retrofit.Builder()
                 .baseUrl(mBaseUrl)
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                .client(new OkHttpClient.Builder().addInterceptor(logging).addInterceptor(basicAuthInterceptor).build())
+                .client(new OkHttpClient.Builder().addInterceptor(basicAuthInterceptor).build())
                 .build();
 
 
     }
-
-
 
 
 }
