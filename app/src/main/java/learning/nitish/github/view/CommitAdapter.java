@@ -2,6 +2,7 @@ package learning.nitish.github.view;
 
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,13 +12,22 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
 import learning.nitish.github.R;
+import learning.nitish.github.helper.DateTimeHellperClass;
 import learning.nitish.github.model.CommitsResponse;
 
 /**
@@ -44,6 +54,7 @@ public class CommitAdapter extends RecyclerView.Adapter<CommitAdapter.CommitView
     public void onBindViewHolder(CommitViewHolder holder, int position) {
         String commitID = "Commit Id: ";
         String commitMessage = "Commit: ";
+
 
         CommitsResponse commitsResponse = mCommitsResponseList.get(position);
 
@@ -74,6 +85,9 @@ public class CommitAdapter extends RecyclerView.Adapter<CommitAdapter.CommitView
 
         }
 
+        holder.txtCommitTime.setText(DateTimeHellperClass.parseDate(commitsResponse.getCommit().getAuthor().getDate()));
+
+
 
     }
 
@@ -94,6 +108,12 @@ public class CommitAdapter extends RecyclerView.Adapter<CommitAdapter.CommitView
         notifyDataSetChanged();
     }
 
+    public void removeAllCommits() {
+
+        mCommitsResponseList.clear();
+        notifyDataSetChanged();
+    }
+
     class CommitViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.imgviewUser)
@@ -104,10 +124,14 @@ public class CommitAdapter extends RecyclerView.Adapter<CommitAdapter.CommitView
         TextView txtCommitId;
         @BindView(R.id.txtCommitMessage)
         TextView txtCommitMessage;
+        @BindView(R.id.txtCommitTime)
+        TextView txtCommitTime;
 
         public CommitViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
     }
+
+
 }

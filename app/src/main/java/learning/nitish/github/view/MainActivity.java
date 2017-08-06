@@ -8,6 +8,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -15,8 +16,10 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import learning.nitish.github.R;
 import learning.nitish.github.application.GithubApplication;
+import learning.nitish.github.helper.DateTimeHellperClass;
 import learning.nitish.github.model.CommitsResponse;
 import learning.nitish.github.presenter.CommitPresenter;
 import learning.nitish.github.service.CommitService;
@@ -36,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements CommitViewInterfa
     CommitAdapter mCommitAdapter;
 
     ProgressDialog mProgressDialog;
+    List<CommitsResponse> commitsList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,12 +111,34 @@ public class MainActivity extends AppCompatActivity implements CommitViewInterfa
     @Override
     public void onCommits(List<CommitsResponse> commitsResponses) {
 
-        Collections.sort(commitsResponses, (o1, o2) -> o1.getAuthor().getId() - o2.getAuthor().getId());
-        mCommitAdapter.addCommits(commitsResponses);
+         commitsList.addAll(commitsResponses);
+        mCommitAdapter.addCommits(commitsList);
     }
 
     @Override
     public Observable<List<CommitsResponse>> getCommits() {
-        return mCommitService.getLatestCommits(50);
+        return mCommitService.getLatestCommits(40);
     }
+
+    @OnClick(R.id.btnSortTime)
+    public void sortListByTime() {
+        //Collections.sort(commitsList, (o1, o2) -> DateTimeHellperClass.convertTOMillis(o2.getCommit().getAuthor().getDate()) - DateTimeHellperClass.convertTOMillis(o1.getCommit().getAuthor().getDate()));
+        mCommitAdapter.removeAllCommits();
+        mCommitAdapter.addCommits(commitsList);
+
+
+    }
+
+
+    @OnClick(R.id.btnSortAuthor)
+    public void sortListByAuthor() {
+        List<CommitsResponse> sortedCommitsList = new ArrayList<>(commitsList);
+        Collections.sort(sortedCommitsList, (o1, o2) -> o1.getAuthor().getId() - o2.getAuthor().getId());
+        mCommitAdapter.removeAllCommits();
+        mCommitAdapter.addCommits(sortedCommitsList);
+
+
+    }
+
+
 }
