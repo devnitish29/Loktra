@@ -4,4 +4,5 @@
     <string name="user_token">2764093db43fdfd21c4dffc77c9721aa96fcc0dd</string>
     <string name="btn_sort_time">Sort By Time</string>
     <string name="btn_sort_author">Sort By Author</string>
+    <string name="action_search">Search</string>
 </resources>

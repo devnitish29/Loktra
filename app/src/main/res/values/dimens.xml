@@ -2,6 +2,7 @@
 <resources>
     <dimen name="card_corner_radius">2dp</dimen>
     <dimen name="padding_min">5dp</dimen>
+    <dimen name="margin_min">5dp</dimen>
     <dimen name="image_thumb_width">75dp</dimen>
     <dimen name="font_size_large">18sp</dimen>
     <dimen name="font_size_medium">12sp</dimen>

@@ -15,6 +15,7 @@ public class CommitsResponse {
     @SerializedName("author")
     @Expose
     private Author_ author;
+    private boolean isBookMarked;
 
     public String getSha() {
         return sha;
@@ -40,4 +41,12 @@ public class CommitsResponse {
         this.author = author;
     }
 
+
+    public boolean isBookMarked() {
+        return isBookMarked;
+    }
+
+    public void setBookMarked(boolean bookMarked) {
+        isBookMarked = bookMarked;
+    }
 }

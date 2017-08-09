@@ -2,26 +2,18 @@ package learning.nitish.github.view;
 
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -88,6 +80,13 @@ public class CommitAdapter extends RecyclerView.Adapter<CommitAdapter.CommitView
         holder.txtCommitTime.setText(DateTimeHellperClass.parseDate(commitsResponse.getCommit().getAuthor().getDate()));
 
 
+        holder.imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MainActivity.mBookMarkList.add(mCommitsResponseList.get(position));
+            }
+        });
+
 
     }
 
@@ -102,7 +101,14 @@ public class CommitAdapter extends RecyclerView.Adapter<CommitAdapter.CommitView
     }
 
 
-    public void addCommits(List<CommitsResponse> commitsResponses) {
+    public void addCommits(CommitsResponse commitsResponses) {
+
+        mCommitsResponseList.add(commitsResponses);
+        notifyDataSetChanged();
+    }
+
+
+    public void addCommitsList(List<CommitsResponse> commitsResponses) {
 
         mCommitsResponseList.addAll(commitsResponses);
         notifyDataSetChanged();
@@ -126,6 +132,8 @@ public class CommitAdapter extends RecyclerView.Adapter<CommitAdapter.CommitView
         TextView txtCommitMessage;
         @BindView(R.id.txtCommitTime)
         TextView txtCommitTime;
+        @BindView(R.id.imgBookMark)
+        ImageView imageView;
 
         public CommitViewHolder(View itemView) {
             super(itemView);

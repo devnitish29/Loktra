@@ -6,6 +6,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -19,14 +22,13 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import learning.nitish.github.R;
 import learning.nitish.github.application.GithubApplication;
-import learning.nitish.github.helper.DateTimeHellperClass;
 import learning.nitish.github.model.CommitsResponse;
 import learning.nitish.github.presenter.CommitPresenter;
 import learning.nitish.github.service.CommitService;
 import rx.Observable;
 
 
-public class MainActivity extends AppCompatActivity implements CommitViewInterface {
+public class MainActivity extends AppCompatActivity implements CommitViewInterface, SearchView.OnQueryTextListener {
 
     @Inject
     CommitService mCommitService;
@@ -35,11 +37,15 @@ public class MainActivity extends AppCompatActivity implements CommitViewInterfa
 
     @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
+//    @BindView(R.id.toolbar)
+//    Toolbar toolbar;
 
     CommitAdapter mCommitAdapter;
 
     ProgressDialog mProgressDialog;
     List<CommitsResponse> commitsList = new ArrayList<>();
+
+    static List<CommitsResponse> mBookMarkList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +61,8 @@ public class MainActivity extends AppCompatActivity implements CommitViewInterfa
     }
 
     private void initViews() {
+
+//        toolbar.setTitle(R.string.app_name);
 
         mRecyclerView.setRecycledViewPool(new RecyclerView.RecycledViewPool());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -72,6 +80,20 @@ public class MainActivity extends AppCompatActivity implements CommitViewInterfa
 
     }
 
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        menu.findItem(R.menu.search_menu);
+
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search);
+        searchView.setOnQueryTextListener(this);
+
+
+        return super.onCreateOptionsMenu(menu);
+
+
+    }
 
     @Override
     protected void onResume() {
@@ -110,9 +132,9 @@ public class MainActivity extends AppCompatActivity implements CommitViewInterfa
 
     @Override
     public void onCommits(List<CommitsResponse> commitsResponses) {
-
-         commitsList.addAll(commitsResponses);
-        mCommitAdapter.addCommits(commitsList);
+        mCommitAdapter.removeAllCommits();
+        commitsList.addAll(commitsResponses);
+        mCommitAdapter.addCommitsList(commitsList);
     }
 
     @Override
@@ -124,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements CommitViewInterfa
     public void sortListByTime() {
         //Collections.sort(commitsList, (o1, o2) -> DateTimeHellperClass.convertTOMillis(o2.getCommit().getAuthor().getDate()) - DateTimeHellperClass.convertTOMillis(o1.getCommit().getAuthor().getDate()));
         mCommitAdapter.removeAllCommits();
-        mCommitAdapter.addCommits(commitsList);
+        mCommitAdapter.addCommitsList(commitsList);
 
 
     }
@@ -135,10 +157,38 @@ public class MainActivity extends AppCompatActivity implements CommitViewInterfa
         List<CommitsResponse> sortedCommitsList = new ArrayList<>(commitsList);
         Collections.sort(sortedCommitsList, (o1, o2) -> o1.getAuthor().getId() - o2.getAuthor().getId());
         mCommitAdapter.removeAllCommits();
-        mCommitAdapter.addCommits(sortedCommitsList);
+        mCommitAdapter.addCommitsList(sortedCommitsList);
 
 
     }
 
 
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+
+        searchFromList(newText);
+        return false;
+    }
+
+    private void searchFromList(String newText) {
+
+
+        if (newText.length() > 0) {
+            for (CommitsResponse commitsResponse : commitsList) {
+                if (commitsResponse.getCommit().getAuthor().getName().contains(newText) || commitsResponse.getCommit().getMessage().contains(newText)) {
+                    mCommitAdapter.removeAllCommits();
+                    mCommitAdapter.addCommits(commitsResponse);
+                }
+            }
+        } else {
+            mCommitAdapter.removeAllCommits();
+            mCommitAdapter.addCommitsList(commitsList);
+        }
+
+    }
 }
