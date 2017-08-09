@@ -7,6 +7,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -68,7 +69,6 @@ public class MainActivity extends AppCompatActivity implements CommitViewInterfa
 
     private void initViews() {
 
-//        toolbar.setTitle(R.string.app_name);
 
         mRecyclerView.setRecycledViewPool(new RecyclerView.RecycledViewPool());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -183,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements CommitViewInterfa
 
     @OnClick(R.id.btnSortTime)
     public void sortListByTime() {
-        //Collections.sort(commitsList, (o1, o2) -> DateTimeHellperClass.convertTOMillis(o2.getCommit().getAuthor().getDate()) - DateTimeHellperClass.convertTOMillis(o1.getCommit().getAuthor().getDate()));
+
         mCommitAdapter.removeAllCommits();
         mCommitAdapter.addCommitsList(commitsList);
 
@@ -209,41 +209,9 @@ public class MainActivity extends AppCompatActivity implements CommitViewInterfa
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        //Log.e("NITISH", "onQueryTextChange: " + newText);
-        searchFromList(newText);
+            mCommitAdapter.getFilter().filter(newText);
         return false;
     }
 
-    private void searchFromList(String newText) {
 
-
-        if (newText.length() > 0) {
-
-            Log.e("NITISH", "searchFromList: " + newText);
-            String startRegex = "\\b";
-            String endRegex = "\\B";
-            String regex = startRegex.concat(newText.concat(endRegex));
-            Log.e("nitish", "searchFromList: " + regex);
-
-
-            for (CommitsResponse commitsResponse : commitsList) {
-                Log.e(TAG, "searchFromList: byname " + commitsResponse.getCommit().getAuthor().getName().matches(regex));
-                Log.e(TAG, "searchFromList: commit " + commitsResponse.getCommit().getMessage().matches(regex));
-                if (commitsResponse.getCommit().getAuthor().getName().matches(regex)) {
-
-
-                    Log.e("NItISH", "searchFromList: getName" + commitsResponse.getCommit().getAuthor().getName() + "  newText  " + newText);
-                    mCommitAdapter.removeAllCommits();
-                    mCommitAdapter.addCommits(commitsResponse);
-
-                } else if (commitsResponse.getCommit().getMessage().matches(regex)) {
-
-                    Log.e("NItISH", "searchFromList: getMessage" + commitsResponse.getCommit().getMessage() + "  newText  " + newText);
-                    mCommitAdapter.removeAllCommits();
-                    mCommitAdapter.addCommits(commitsResponse);
-                }
-            }
-        }
-
-    }
 }

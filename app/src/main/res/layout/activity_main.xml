@@ -6,14 +6,6 @@
     tools:context="learning.nitish.github.view.MainActivity">
 
 
-    <!--<android.support.v7.widget.Toolbar-->
-        <!--android:id="@+id/toolbar"-->
-        <!--theme="@style/Widget.AppCompat.Toolbar"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="?actionBarSize"-->
-        <!--android:layout_gravity="top"-->
-        <!--android:background="@color/colorPrimary" />-->
-
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"

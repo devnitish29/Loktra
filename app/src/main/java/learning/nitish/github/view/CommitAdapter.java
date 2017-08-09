@@ -5,6 +5,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -26,15 +28,17 @@ import learning.nitish.github.model.CommitsResponse;
  * Created by Nitish Singh Rathore on 5/8/17.
  */
 
-public class CommitAdapter extends RecyclerView.Adapter<CommitAdapter.CommitViewHolder> {
+public class CommitAdapter extends RecyclerView.Adapter<CommitAdapter.CommitViewHolder> implements Filterable {
 
     List<CommitsResponse> mCommitsResponseList;
     LayoutInflater mLayoutInflater;
+    private ArrayList<CommitsResponse> filterResult;
 
     public CommitAdapter(LayoutInflater layoutInflater) {
 
         mLayoutInflater = layoutInflater;
         mCommitsResponseList = new ArrayList<>();
+        filterResult = new ArrayList<>();
     }
 
     @Override
@@ -48,7 +52,7 @@ public class CommitAdapter extends RecyclerView.Adapter<CommitAdapter.CommitView
         String commitMessage = "Commit: ";
 
 
-        CommitsResponse commitsResponse = mCommitsResponseList.get(position);
+        CommitsResponse commitsResponse = filterResult.get(position);
 
         if (commitsResponse.getCommit().getAuthor().getName() != null) {
             holder.txtUserName.setText(commitsResponse.getCommit().getAuthor().getName());
@@ -83,14 +87,14 @@ public class CommitAdapter extends RecyclerView.Adapter<CommitAdapter.CommitView
         holder.imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!mCommitsResponseList.get(position).isBookMarked()) {
+                if (!filterResult.get(position).isBookMarked()) {
 
-                    mCommitsResponseList.get(position).setBookMarked(true);
+                    filterResult.get(position).setBookMarked(true);
                     MainActivity.mBookMarkList.add(mCommitsResponseList.get(position));
                     holder.imageView.setImageResource(R.drawable.ic_bookmark_selected);
                 } else {
 
-                    mCommitsResponseList.get(position).setBookMarked(false);
+                    filterResult.get(position).setBookMarked(false);
                     MainActivity.mBookMarkList.remove(mCommitsResponseList.get(position));
                     holder.imageView.setImageResource(R.drawable.ic_bookmark);
                 }
@@ -99,7 +103,7 @@ public class CommitAdapter extends RecyclerView.Adapter<CommitAdapter.CommitView
         });
 
 
-        if (mCommitsResponseList.get(position).isBookMarked()) {
+        if (filterResult.get(position).isBookMarked()) {
             holder.imageView.setImageResource(R.drawable.ic_bookmark_selected);
         } else {
             holder.imageView.setImageResource(R.drawable.ic_bookmark);
@@ -109,8 +113,8 @@ public class CommitAdapter extends RecyclerView.Adapter<CommitAdapter.CommitView
 
     @Override
     public int getItemCount() {
-        if (mCommitsResponseList != null) {
-            return mCommitsResponseList.size();
+        if (filterResult != null) {
+            return filterResult.size();
         } else {
             return 0;
         }
@@ -121,6 +125,7 @@ public class CommitAdapter extends RecyclerView.Adapter<CommitAdapter.CommitView
     public void addCommits(CommitsResponse commitsResponses) {
 
         mCommitsResponseList.add(commitsResponses);
+        filterResult.add(commitsResponses);
         notifyDataSetChanged();
     }
 
@@ -128,14 +133,24 @@ public class CommitAdapter extends RecyclerView.Adapter<CommitAdapter.CommitView
     public void addCommitsList(List<CommitsResponse> commitsResponses) {
 
         mCommitsResponseList.addAll(commitsResponses);
+        filterResult.addAll(commitsResponses);
         notifyDataSetChanged();
     }
 
     public void removeAllCommits() {
 
         mCommitsResponseList.clear();
+        filterResult.clear();
         notifyDataSetChanged();
     }
+
+    @Override
+    public Filter getFilter() {
+
+
+        return new FilteredClass();
+    }
+
 
     class CommitViewHolder extends RecyclerView.ViewHolder {
 
@@ -155,6 +170,47 @@ public class CommitAdapter extends RecyclerView.Adapter<CommitAdapter.CommitView
         public CommitViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+        }
+    }
+
+
+    class FilteredClass extends Filter {
+
+        @Override
+        protected FilterResults performFiltering(CharSequence charSequence) {
+            FilterResults results = new FilterResults();
+            if (charSequence == null || charSequence.length() == 0) {
+                //No need for filter
+                results.values = mCommitsResponseList;
+                results.count = mCommitsResponseList.size();
+
+            } else {
+                //Need Filter
+                // it matches the text  entered in the edittext and set the data in adapter list
+                ArrayList<CommitsResponse> fRecords = new ArrayList<CommitsResponse>();
+
+                for (CommitsResponse response : mCommitsResponseList) {
+                    if (response.getCommit().getAuthor().getName().toLowerCase().trim().contains(charSequence.toString().toLowerCase().trim())) {
+                        fRecords.add(response);
+                    }
+                }
+                for (CommitsResponse response : mCommitsResponseList) {
+                    if (response.getCommit().getMessage().toLowerCase().trim().contains(charSequence.toString().toLowerCase().trim())) {
+                        fRecords.add(response);
+                    }
+                }
+                results.values = fRecords;
+                results.count = fRecords.size();
+            }
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+            if (filterResults != null) {
+                filterResult = (ArrayList<CommitsResponse>) filterResults.values;
+                notifyDataSetChanged();
+            }
         }
     }
 
