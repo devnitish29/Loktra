@@ -5,4 +5,5 @@
     <string name="btn_sort_time">Sort By Time</string>
     <string name="btn_sort_author">Sort By Author</string>
     <string name="action_search">Search</string>
+    <string name="action_bookmark">BookMark</string>
 </resources>

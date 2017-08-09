@@ -12,6 +12,7 @@ import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -36,6 +37,10 @@ public class RetrofitModule {
     Retrofit providesRetrofit() {
 
         final String credentials = Credentials.basic(BuildConfig.USER_NAME, BuildConfig.USER_TOKEN);
+
+        HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor(HttpLoggingInterceptor.Logger.DEFAULT);
+        httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
+
         Interceptor basicAuthInterceptor = new Interceptor() {
             @Override
             public Response intercept(Chain chain) throws IOException {
@@ -51,7 +56,7 @@ public class RetrofitModule {
                 .baseUrl(mBaseUrl)
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                .client(new OkHttpClient.Builder().addInterceptor(basicAuthInterceptor).build())
+                .client(new OkHttpClient.Builder().addInterceptor(basicAuthInterceptor).addInterceptor(httpLoggingInterceptor).build())
                 .build();
 
 

@@ -83,10 +83,27 @@ public class CommitAdapter extends RecyclerView.Adapter<CommitAdapter.CommitView
         holder.imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MainActivity.mBookMarkList.add(mCommitsResponseList.get(position));
+                if (!mCommitsResponseList.get(position).isBookMarked()) {
+
+                    mCommitsResponseList.get(position).setBookMarked(true);
+                    MainActivity.mBookMarkList.add(mCommitsResponseList.get(position));
+                    holder.imageView.setImageResource(R.drawable.ic_bookmark_selected);
+                } else {
+
+                    mCommitsResponseList.get(position).setBookMarked(false);
+                    MainActivity.mBookMarkList.remove(mCommitsResponseList.get(position));
+                    holder.imageView.setImageResource(R.drawable.ic_bookmark);
+                }
+
             }
         });
 
+
+        if (mCommitsResponseList.get(position).isBookMarked()) {
+            holder.imageView.setImageResource(R.drawable.ic_bookmark_selected);
+        } else {
+            holder.imageView.setImageResource(R.drawable.ic_bookmark);
+        }
 
     }
 

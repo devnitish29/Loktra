@@ -7,8 +7,10 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
-import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -30,6 +32,7 @@ import rx.Observable;
 
 public class MainActivity extends AppCompatActivity implements CommitViewInterface, SearchView.OnQueryTextListener {
 
+    private static final String TAG = "NITISH";
     @Inject
     CommitService mCommitService;
 
@@ -45,7 +48,10 @@ public class MainActivity extends AppCompatActivity implements CommitViewInterfa
     ProgressDialog mProgressDialog;
     List<CommitsResponse> commitsList = new ArrayList<>();
 
+
     static List<CommitsResponse> mBookMarkList = new ArrayList<>();
+
+    boolean isBookMarkDataVisible = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,15 +90,48 @@ public class MainActivity extends AppCompatActivity implements CommitViewInterfa
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        menu.findItem(R.menu.search_menu);
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.search_menu, menu);
 
-        SearchView searchView = (SearchView) menu.findItem(R.id.action_search);
-        searchView.setOnQueryTextListener(this);
+        MenuItem menuItem = (MenuItem) menu.findItem(R.id.action_search);
+        SearchView searchView = null;
+
+        if (menuItem != null) {
+            searchView = (SearchView) menuItem.getActionView();
+            searchView.setOnQueryTextListener(this);
+        }
 
 
         return super.onCreateOptionsMenu(menu);
 
 
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (item.getItemId() == R.id.action_bookmark) {
+            if (!isBookMarkDataVisible) {
+                isBookMarkDataVisible = true;
+                item.setIcon(R.drawable.ic_bookmark_selected);
+                showBookMarkCommits();
+            } else {
+                isBookMarkDataVisible = false;
+                item.setIcon(R.drawable.ic_bookmark);
+                mCommitAdapter.removeAllCommits();
+                mCommitAdapter.addCommitsList(commitsList);
+            }
+
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void showBookMarkCommits() {
+
+        mCommitAdapter.removeAllCommits();
+        mCommitAdapter.addCommitsList(mBookMarkList);
     }
 
     @Override
@@ -170,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements CommitViewInterfa
 
     @Override
     public boolean onQueryTextChange(String newText) {
-
+        //Log.e("NITISH", "onQueryTextChange: " + newText);
         searchFromList(newText);
         return false;
     }
@@ -179,15 +218,31 @@ public class MainActivity extends AppCompatActivity implements CommitViewInterfa
 
 
         if (newText.length() > 0) {
+
+            Log.e("NITISH", "searchFromList: " + newText);
+            String startRegex = "\\b";
+            String endRegex = "\\B";
+            String regex = startRegex.concat(newText.concat(endRegex));
+            Log.e("nitish", "searchFromList: " + regex);
+
+
             for (CommitsResponse commitsResponse : commitsList) {
-                if (commitsResponse.getCommit().getAuthor().getName().contains(newText) || commitsResponse.getCommit().getMessage().contains(newText)) {
+                Log.e(TAG, "searchFromList: byname " + commitsResponse.getCommit().getAuthor().getName().matches(regex));
+                Log.e(TAG, "searchFromList: commit " + commitsResponse.getCommit().getMessage().matches(regex));
+                if (commitsResponse.getCommit().getAuthor().getName().matches(regex)) {
+
+
+                    Log.e("NItISH", "searchFromList: getName" + commitsResponse.getCommit().getAuthor().getName() + "  newText  " + newText);
+                    mCommitAdapter.removeAllCommits();
+                    mCommitAdapter.addCommits(commitsResponse);
+
+                } else if (commitsResponse.getCommit().getMessage().matches(regex)) {
+
+                    Log.e("NItISH", "searchFromList: getMessage" + commitsResponse.getCommit().getMessage() + "  newText  " + newText);
                     mCommitAdapter.removeAllCommits();
                     mCommitAdapter.addCommits(commitsResponse);
                 }
             }
-        } else {
-            mCommitAdapter.removeAllCommits();
-            mCommitAdapter.addCommitsList(commitsList);
         }
 
     }
